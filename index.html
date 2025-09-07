@@ -89,6 +89,7 @@
         display: grid;
         place-items: center;
         position: relative;
+        z-index: 2;
       }
 
       .plate {
@@ -157,6 +158,12 @@
       .panel { position: absolute; inset: 10px; opacity: 0; pointer-events: none; transition: opacity 150ms ease; color: var(--muted); font-size: clamp(9px, 1.2vw, 13px); line-height: 1.5; overflow: auto; }
       .panel.active { opacity: 1; pointer-events: auto; }
 
+      /* === PNG rain layer === */
+      .rain { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+      .drop { position: absolute; top: -10vh; opacity: .7; will-change: transform; }
+      .drop img { display: block; transform: scale(1); }
+      @keyframes fall { 0% { transform: translateY(-10vh);} 100% { transform: translateY(110vh);} }
+
       /* Responsive: stack FAQ if screen is narrow, still within single page */
       @media (max-width: 880px) {
         .wrap { grid-template-rows: 64px 1fr 220px; }
@@ -165,6 +172,7 @@
     </style>
   </head>
   <body>
+    <div class="rain" id="rain" aria-hidden="true"></div>
     <div class="wrap">
       <!-- Top toolbar -->
       <div class="toolbar">        <div class="btns">
@@ -176,6 +184,8 @@
       <!-- Center stage with spinning emoji coin -->
       <main class="stage">
         <div class="plate" aria-label="Spinning COIN">
+            <button aria-label="Copy 🪙" style="position:absolute;top:8px;right:8px;padding:6px 10px;font-family:'Press Start 2P',monospace;font-size:10px;border:2px solid var(--grid);background:#0f1114;color:var(--gold);border-radius:8px;cursor:pointer;" onclick="navigator.clipboard.writeText('🪙');this.textContent='COPIED';setTimeout(()=>this.textContent='COPY 🪙',900);">COPY</button>
+
           <div class="coin" aria-hidden="true">🪙</div>
         </div>
         <div class="title">ca: ....PUMP</div>
@@ -205,6 +215,13 @@
     </div>
 
     <script>
+      // >>> PNG RAIN IMAGES — EDIT THIS LIST <<<
+      // Put your PNG paths here (relative to this HTML or /public in frameworks)
+    window.RAIN_IMAGES = [
+  "A.png","B.png","C.png","D.png","E.png","F.png",
+  "G.png","H.png","I.png","J.png","K.png","L.png"
+];
+
       // Keep the page locked to one screen
       document.documentElement.style.overflow = "hidden";
       document.body.style.overflow = "hidden";
@@ -245,6 +262,60 @@
           if (target) target.classList.add('active');
         });
       });
+      // ===== PNG Rain =====
+      (function(){
+        const root = document.getElementById('rain');
+        if (!root) return;
+        const plate = document.querySelector('.plate');
+        const IMGS = (window.RAIN_IMAGES && window.RAIN_IMAGES.length) ? window.RAIN_IMAGES : [];
+        const MAX = 20;               // max concurrent drops
+        const MIN_T = 6, MAX_T = 12;  // seconds per fall
+        const PAD = 24;               // padding around the coin to avoid spawns
+
+        function spawn(){
+          if (!IMGS.length) return; // user will set window.RAIN_IMAGES = ['a.png','b.png',...]
+          const imgSrc = IMGS[Math.floor(Math.random()*IMGS.length)];
+          const el = document.createElement('div');
+          el.className = 'drop';
+          const img = document.createElement('img');
+          img.src = imgSrc;
+          img.decoding = 'async';
+          img.loading = 'lazy';
+          el.appendChild(img);
+
+          // pick an x that doesn't overlap the coin area
+          const vw = window.innerWidth;
+          const rect = plate.getBoundingClientRect();
+          let x = Math.random() * vw;
+          let tries = 0;
+          while (x > rect.left - PAD && x < rect.right + PAD && tries < 10){
+            x = Math.random() * vw; tries++;
+          }
+          el.style.left = Math.max(0, Math.min(vw-32, x)) + 'px';
+
+          const dur = (MIN_T + Math.random()*(MAX_T-MIN_T)).toFixed(2) + 's';
+          el.style.animation = `fall ${dur} linear`;
+          el.addEventListener('animationend', () => el.remove());
+          root.appendChild(el);
+        }
+
+        // 1–3 drops every 2s, spread randomly within each 2s window (no bundling)
+        let paused = false;
+        document.addEventListener('visibilitychange', () => { paused = document.hidden; });
+        function schedule(){
+          if (!paused) {
+            const n = 1 + Math.floor(Math.random() * 3); // 1..3
+            for (let i = 0; i < n; i++) {
+              const jitter = Math.random() * 1800; // spread inside 2s window
+              setTimeout(() => {
+                if (!paused && root.childElementCount < MAX) spawn();
+              }, jitter);
+            }
+          }
+          setTimeout(schedule, 2000);
+        }
+        schedule();
+      })();
     </script>
   </body>
 </html>

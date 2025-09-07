@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>COIN — The Emoji Memecoin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0e0f11;
+        --card: #16181c;
+        --grid: #1e2228;
+        --gold: #d4af37;
+        --gold-soft: rgba(212, 175, 55, 0.3);
+        --text: #e9ecf1;
+        --muted: #98a2b3;
+      }
+
+      * { box-sizing: border-box; }
+      html, body { height: 100%; }
+      body {
+        margin: 0;
+        font-family: "Press Start 2P", system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+        background: radial-gradient(1200px 800px at 50% 30%, #121417 0%, var(--bg) 60%);
+        color: var(--text);
+        overflow: hidden; /* no page scroll */
+        letter-spacing: 0.5px;
+      }
+
+      /* Layout: one-screen grid */
+      .wrap {
+        height: 100vh;
+        width: 100vw;
+        display: grid;
+        grid-template-rows: 64px 1fr 180px; /* header, center, faq */
+        gap: 12px;
+        padding: 12px clamp(10px, 3vw, 28px);
+      }
+
+      /* Top toolbar centered */
+      .toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: center; /* centered horizontally */
+        position: relative;
+      }
+      .btns {
+        display: inline-flex;
+        gap: 10px;
+        background: linear-gradient(180deg, #101215, #0c0d10);
+        padding: 10px 12px;
+        border: 1px solid var(--grid);
+        border-radius: 10px;
+        box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02), 0 0 22px rgba(212,175,55,0.05);
+      }
+
+      button.pixel {
+        appearance: none;
+        border: 2px solid var(--grid);
+        background: #0f1114;
+        color: var(--text);
+        padding: 10px 14px;
+        font: inherit;
+        font-size: clamp(10px, 1.4vw, 14px);
+        border-radius: 8px;
+        position: relative;
+        cursor: pointer;
+        transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
+      }
+      button.pixel:hover {
+        transform: translateY(-2px);
+        border-color: var(--gold);
+        box-shadow: 0 6px 18px rgba(212, 175, 55, 0.18), 0 0 22px rgba(212,175,55,0.15);
+      }
+      button.pixel:active { transform: translateY(0); }
+
+      .btn-gold {
+        background: linear-gradient(180deg, rgba(212,175,55,0.15), rgba(212,175,55,0.05));
+        color: var(--gold);
+      }
+
+      /* Center coin stage */
+      .stage {
+        display: grid;
+        place-items: center;
+        position: relative;
+      }
+
+      .plate {
+        width: clamp(260px, 38vw, 520px);
+        aspect-ratio: 1 / 1;
+        background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.1));
+        border: 1px solid var(--grid);
+        border-radius: 16px;
+        position: relative;
+        display: grid;
+        place-items: center;
+        box-shadow: inset 0 0 60px rgba(212,175,55,0.04), 0 0 0 1px rgba(255,255,255,0.02);
+        overflow: hidden;
+      }
+
+      /* Gold neon sweep around the plate */
+      .plate::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 16px;
+        padding: 1px;
+        background: conic-gradient(from var(--a), transparent 0 60deg, var(--gold) 80deg 100deg, transparent 120deg 360deg);
+        -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+        -webkit-mask-composite: xor;
+                mask-composite: exclude;
+        animation: sweep 5s linear infinite;
+      }
+      @keyframes sweep { to { --a: 360deg; } }
+
+      /* Actual emoji coin */
+      .coin {
+        font-size: clamp(120px, 18vw, 260px);
+        transform-style: preserve-3d;
+        animation: spin 5.5s linear infinite;
+        filter: drop-shadow(0 10px 24px rgba(212,175,55,0.22)) drop-shadow(0 0 12px rgba(212,175,55,0.18));
+        line-height: 1;
+        user-select: none;
+        will-change: transform;
+      }
+      @keyframes spin {
+        0%   { transform: rotateY(0deg) rotateX(6deg); }
+        50%  { transform: rotateY(180deg) rotateX(6deg); }
+        100% { transform: rotateY(360deg) rotateX(6deg); }
+      }
+
+      /* Title under plate */
+      .title {
+        margin-top: 6px;
+        text-align: center;
+        font-family: "Press Start 2P", monospace;
+        font-size: clamp(10px, 1.1vw, 14px);
+        color: var(--gold);
+        text-shadow: 0 0 6px var(--gold-soft), 0 0 14px var(--gold-soft);
+        letter-spacing: 0.5px;
+      }
+
+      /* FAQ area locked to page without scrolling */
+      .faq { max-width: 1200px; margin: 0 auto; height: 100%; }
+      .faq-shell { background: linear-gradient(180deg, #14171b, #121417); border: 1px solid var(--grid); border-radius: 12px; padding: 10px; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02); display: grid; grid-template-rows: 42px 1fr; height: 100%; }
+      .faq-tabs { display: flex; gap: 10px; }
+      .tab { appearance: none; border: 2px solid var(--grid); background: #0f1114; color: var(--text); padding: 8px 12px; font: inherit; font-size: clamp(10px, 1.3vw, 14px); border-radius: 8px; cursor: pointer; transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease; }
+      .tab:hover { transform: translateY(-1px); border-color: var(--gold); box-shadow: 0 6px 18px rgba(212, 175, 55, 0.18), 0 0 22px rgba(212,175,55,0.15); }
+      .tab.active { color: var(--gold); border-color: var(--gold); box-shadow: 0 0 10px rgba(212,175,55,0.15) inset; background: linear-gradient(180deg, rgba(212,175,55,0.12), rgba(212,175,55,0.03)); }
+      .faq-panel { position: relative; border: 1px solid var(--grid); border-radius: 10px; padding: 10px; background: linear-gradient(180deg, #14171b, #121417); box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02); overflow: hidden; }
+      .panel { position: absolute; inset: 10px; opacity: 0; pointer-events: none; transition: opacity 150ms ease; color: var(--muted); font-size: clamp(9px, 1.2vw, 13px); line-height: 1.5; overflow: auto; }
+      .panel.active { opacity: 1; pointer-events: auto; }
+
+      /* Responsive: stack FAQ if screen is narrow, still within single page */
+      @media (max-width: 880px) {
+        .wrap { grid-template-rows: 64px 1fr 220px; }
+        .faq { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <!-- Top toolbar -->
+      <div class="toolbar">        <div class="btns">
+          <button id="closeBtn" class="pixel" aria-label="Close">X</button>
+          <button id="buyBtn" class="pixel btn-gold">BUY 🪙</button>
+        </div>
+      </div>
+
+      <!-- Center stage with spinning emoji coin -->
+      <main class="stage">
+        <div class="plate" aria-label="Spinning COIN">
+          <div class="coin" aria-hidden="true">🪙</div>
+        </div>
+        <div class="title">ca: ....PUMP</div>
+      </main>
+
+      <!-- FAQ bottom row -->
+      <section class="faq" aria-label="FAQ">
+        <div class="faq-shell">
+          <div class="faq-tabs">
+            <button class="tab active" data-tab="what">What is 🪙?</button>
+            <button class="tab" data-tab="story">Story of 🪙</button>
+            <button class="tab" data-tab="why">Why buy 🪙?</button>
+          </div>
+          <div class="faq-panel">
+            <div class="panel active" id="what">
+              The father of coins. The coin of coins. Ubiquitous, universal, understood by everyone. Tap the emoji and your brain reads value.
+            </div>
+            <div class="panel" id="story">
+              The coin emoji joined Unicode 13.0 in 2020 (Emoji 13.0). Crypto & finance users embraced it to mark digital money across chats, apps and tickers. One tiny glyph, global signal.
+            </div>
+            <div class="panel" id="why">
+              Every day, we chase the “next coin.” This <em>is</em> the coin. Simple story. Worldwide meme. If you get it, you get it.
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      // Keep the page locked to one screen
+      document.documentElement.style.overflow = "hidden";
+      document.body.style.overflow = "hidden";
+
+      // Button behaviors
+      const closeBtn = document.getElementById("closeBtn");
+      const buyBtn = document.getElementById("buyBtn");
+
+      // Subtle shake on X click, no duplicate X rendering
+      closeBtn.addEventListener("click", () => {
+        closeBtn.animate([
+          { transform: "translateY(0)" },
+          { transform: "translateY(-2px)" },
+          { transform: "translateY(0)" },
+          { transform: "translateY(2px)" },
+          { transform: "translateY(0)" }
+        ], { duration: 220, iterations: 1 });
+      });
+
+      buyBtn.addEventListener("click", () => {
+        // Replace with your real buy link when ready
+        alert("Replace this with your BUY link. Example: https://pump.fun/...? ");
+      });
+
+      // Optional: pause spin on hover without glitch
+      const coin = document.querySelector('.coin');
+      coin.addEventListener('mouseenter', () => { coin.style.animationPlayState = 'paused'; });
+      coin.addEventListener('mouseleave', () => { coin.style.animationPlayState = 'running'; });
+      // FAQ tabs (no layout jump)
+      const tabButtons = document.querySelectorAll('.faq .tab');
+      const tabPanels = document.querySelectorAll('.faq .panel');
+      tabButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          tabButtons.forEach(b => b.classList.remove('active'));
+          tabPanels.forEach(p => p.classList.remove('active'));
+          btn.classList.add('active');
+          const target = document.getElementById(btn.dataset.tab);
+          if (target) target.classList.add('active');
+        });
+      });
+    </script>
+  </body>
+</html>
